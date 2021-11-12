@@ -1,6 +1,7 @@
 (function() {
-  "use strict";
 
+  //Displaying questions//
+  "use strict";
   let questions = [
     {
       question: "What is the MAIN reason why poverty happens?",
@@ -40,6 +41,7 @@
     },
     
   ];
+//using variables to set the quiz
 
   let questionIndex,
     currentQuestion,
@@ -50,6 +52,7 @@
     isQuizDone;
   let quiz = document.getElementById("quiz");
 
+  //function 
   function initQuiz() {
     quiz.classList.remove("quiz-intro");
     quiz.classList.add("quiz-started");
@@ -95,6 +98,7 @@
     answers.innerHTML = output;
   }
 
+  //timer function
   function startTimer() {
     let s = 0;
     let m = 0;
@@ -130,6 +134,7 @@
     }, 1000);
   }
 
+// displaying the results once the user gets to the end of the quiz, end timer as well
   function displayResults() {
     let notification = document.getElementById("notification");
     notification.parentElement.removeChild(notification);
@@ -181,6 +186,7 @@
 
     questionIsAnswered = 1;
 
+//how much progress the user has input
     progress.style.width = progressPercentage() + "%";
 
     let notification = document.createElement("div");
@@ -227,6 +233,7 @@
     document.getElementById("score").textContent = score;
   }
 
+//perecentage of the final score in the end.
   let scorePercentage = () => (score / questions.length * 100).toFixed(0);
   let progressPercentage = () =>
     (currentQuestion / questions.length * 100).toFixed(0);
@@ -265,6 +272,7 @@
     });
   }
 
+//if statements
   document.addEventListener("click", function(e) {
     if (
       e.target.matches("#start-quiz-btn") ||
