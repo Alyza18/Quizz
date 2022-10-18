@@ -1,301 +1,289 @@
-(function() {
 
-  //Displaying questions//
-  "use strict";
-  let questions = [
-    {
-      question: "What is the MAIN reason why poverty happens?",
-      answers: ["Because of Lack of accesses of basic resources for sustainable live hoods ", "Because People litter and keep the environment filthy", "Because people don't have a job, so their poor and in need of money", "All of the above"],
-      correctAnswer: 1
-    },
-    {
-      question: "What is climate change?",
-      answers: ["  B. When mars is warming globally", "When it climate changes", "A. long term change in the average weather patterns that have come to define earth's local and regional change.", "Change of atmosphere"],
-      correctAnswer: 3
-    },
-    {
-      question: " Which one of these is not a global issue?",
-      answers: ["Climate change", "Age consent", "Police brutality", "Covid19"],
-      correctAnswer: 2
-    },
-    {
-      question: " what can we do to protect the enviroment?",
-      answers: ["Reduce, reuse, recycle, ", "Litter", "Burning fossil fuels", "None of the above"],
-      correctAnswer: 3
-    },
-    {
-      question: "How does the growth in population effect the environment?",
-      answers: ["People litter in the streets", "More people require more resources, which means that as the population increases", "More people want to eat and it effects the environment", "Covid19"],
-      correctAnswer: 2
-    },
-    {
-      question: " Which one of these affects a number of countries and population?",
-      answers: ["Global warming", "Poverty", "Global issue", "Terrorism"],
-      correctAnswer: 3
-    },
-    {
-      question: " Which of the following events is an example of democratic change?",
-      answers: ["China's transition to a market economy", "The Arab Spring in the middle east and North Africa", "China's transition to a market economy",
-      "The creation of the IMF and the World Ban", "Japan's effect on polution"],
-      correctAnswer: 2
-    },
+//selecting all required elements
+const start_btn = document.querySelector(".start_btn button");
+const info_box = document.querySelector(".info_box");
+const exit_btn = info_box.querySelector(".buttons .quit");
+const continue_btn = info_box.querySelector(".buttons .restart");
+const quiz_box = document.querySelector(".quiz_box");
+const result_box = document.querySelector(".result_box");
+const option_list = document.querySelector(".option_list");
+const time_line = document.querySelector("header .time_line");
+const timeText = document.querySelector(".timer .time_left_txt");
+const timeCount = document.querySelector(".timer .timer_sec");
+
+// if startQuiz button clicked
+start_btn.onclick = ()=>{
+    info_box.classList.add("activeInfo"); //show info box
+}
+
+// if exitQuiz button clicked
+exit_btn.onclick = ()=>{
+    info_box.classList.remove("activeInfo"); //hide info box
+}
+
+// if continueQuiz button clicked
+continue_btn.onclick = ()=>{
+    info_box.classList.remove("activeInfo"); //hide info box
+    quiz_box.classList.add("activeQuiz"); //show quiz box
+    showQuetions(0); //calling showQestions function
+    queCounter(1); //passing 1 parameter to queCounter
+    startTimer(15); //calling startTimer function
+    startTimerLine(0); //calling startTimerLine function
+}
+
+let timeValue =  15;
+let que_count = 0;
+let que_numb = 1;
+let userScore = 0;
+let counter;
+let counterLine;
+let widthValue = 0;
+
+const restart_quiz = result_box.querySelector(".buttons .restart");
+const quit_quiz = result_box.querySelector(".buttons .quit");
+
+// if restartQuiz button clicked
+restart_quiz.onclick = ()=>{
+    quiz_box.classList.add("activeQuiz"); //show quiz box
+    result_box.classList.remove("activeResult"); //hide result box
+    timeValue = 15; 
+    que_count = 0;
+    que_numb = 1;
+    userScore = 0;
+    widthValue = 0;
+    showQuetions(que_count); //calling showQestions function
+    queCounter(que_numb); //passing que_numb value to queCounter
+    clearInterval(counter); //clear counter
+    clearInterval(counterLine); //clear counterLine
+    startTimer(timeValue); //calling startTimer function
+    startTimerLine(widthValue); //calling startTimerLine function
+    timeText.textContent = "Time Left"; //change the text of timeText to Time Left
+    next_btn.classList.remove("show"); //hide the next button
+}
+
+// if quitQuiz button clicked
+quit_quiz.onclick = ()=>{
+    window.location.reload(); //reload the current window
+}
+
+const next_btn = document.querySelector("footer .next_btn");
+const bottom_ques_counter = document.querySelector("footer .total_que");
+
+// if Next Que button clicked
+next_btn.onclick = ()=>{
+    if(que_count < questions.length - 1){ //if question count is less than total question length
+        que_count++; //increment the que_count value
+        que_numb++; //increment the que_numb value
+        showQuetions(que_count); //calling showQestions function
+        queCounter(que_numb); //passing que_numb value to queCounter
+        clearInterval(counter); //clear counter
+        clearInterval(counterLine); //clear counterLine
+        startTimer(timeValue); //calling startTimer function
+        startTimerLine(widthValue); //calling startTimerLine function
+        timeText.textContent = "Time Left"; //change the timeText to Time Left
+        next_btn.classList.remove("show"); //hide the next button
+    }else{
+        clearInterval(counter); //clear counter
+        clearInterval(counterLine); //clear counterLine
+        showResult(); //calling showResult function
+    }
+}
+
+// getting questions and options from array
+function showQuetions(index){
+    const que_text = document.querySelector(".que_text");
+
+    //creating a new span and div tag for question and option and passing the value using array index
+    let que_tag = '<span>'+ questions[index].numb + ". " + questions[index].question +'</span>';
+    let option_tag = '<div class="option"><span>'+ questions[index].options[0] +'</span></div>'
+    + '<div class="option"><span>'+ questions[index].options[1] +'</span></div>'
+    + '<div class="option"><span>'+ questions[index].options[2] +'</span></div>'
+    + '<div class="option"><span>'+ questions[index].options[3] +'</span></div>';
+    que_text.innerHTML = que_tag; //adding new span tag inside que_tag
+    option_list.innerHTML = option_tag; //adding new div tag inside option_tag
     
-  ];
-//using variables to set the quiz
+    const option = option_list.querySelectorAll(".option");
 
-  let questionIndex,
-    currentQuestion,
-    score,
-    timeSpent,
-    quizTimer,
-    questionIsAnswered,
-    isQuizDone;
-  let quiz = document.getElementById("quiz");
-
-  //function 
-  function initQuiz() {
-    quiz.classList.remove("quiz-intro");
-    quiz.classList.add("quiz-started");
-
-    questionIndex = 0;
-    currentQuestion = 1;
-    questionIsAnswered = 0;
-    score = 0;
-    timeSpent = "00:00";
-
-    quiz.innerHTML = `<div id="progress-container"><span id="progress"></span></div>
-    <div id="stats">
-    <p>Question: <span id="questionNumber">${currentQuestion}/${
-      questions.length
-    }</span></p>
-    <p>Score: <span id="score">${score}</span></p>
-    <p>Time: <span id="timer">00:00</span></p>
-    </div>
-    <section id="answers"></section>`;
-
-    displayQuestion();
-    startTimer();
-  }
-
-  function displayQuestion() {
-    let question = questions[questionIndex];
-    let answers = document.getElementById("answers");
-    let answerNumber = 0;
-    let output = `<h2 class="text-center bold">${currentQuestion}. ${
-      question.question
-    }</h2>`;
-
-    for (let i in question.answers) {
-      answerNumber++;
-      output += `<div class="answer">
-      <input type="radio" id="answer-${answerNumber}" name="answers" value="${answerNumber}">
-      <label for="answer-${answerNumber}">
-      <span class="answer-number">${answerNumber}.</span> ${question.answers[i]}
-      </label>
-      </div>`;
+    // set onclick attribute to all available options
+    for(i=0; i < option.length; i++){
+        option[i].setAttribute("onclick", "optionSelected(this)");
     }
+}
+// creating the new div tags which for icons
+let tickIconTag = '<div class="icon tick"><i class="fas fa-check"></i></div>';
+let crossIconTag = '<div class="icon cross"><i class="fas fa-times"></i></div>';
 
-    answers.innerHTML = output;
-  }
+//if user clicked on option
+function optionSelected(answer){
+    clearInterval(counter); //clear counter
+    clearInterval(counterLine); //clear counterLine
+    let userAns = answer.textContent; //getting user selected option
+    let correcAns = questions[que_count].answer; //getting correct answer from array
+    const allOptions = option_list.children.length; //getting all option items
+    
+    if(userAns == correcAns){ //if user selected option is equal to array's correct answer
+        userScore += 1; //upgrading score value with 1
+        answer.classList.add("correct"); //adding green color to correct selected option
+        answer.insertAdjacentHTML("beforeend", tickIconTag); //adding tick icon to correct selected option
+        console.log("Correct Answer");
+        console.log("Your correct answers = " + userScore);
+    }else{
+        answer.classList.add("incorrect"); //adding red color to correct selected option
+        answer.insertAdjacentHTML("beforeend", crossIconTag); //adding cross icon to correct selected option
+        console.log("Wrong Answer");
 
-  //timer function
-  function startTimer() {
-    let s = 0;
-    let m = 0;
-    let h = 0;
-    let seconds = 0;
-    let minutes = 0;
-    let hours = 0;
-    let timer = document.getElementById("timer");
-
-    quizTimer = setInterval(function() {
-      s++;
-
-      if (s > 59) {
-        s = 0;
-        m++;
-        seconds = "0" + s;
-      }
-
-      if (m > 59) {
-        m = 0;
-        h++;
-        minutes = "00";
-      }
-
-      seconds = s > 9 ? s : "0" + s;
-      minutes = m > 9 ? m : "0" + m;
-      hours = h > 9 ? h : "0" + h;
-
-      timeSpent = h
-        ? hours + ":" + minutes + ":" + seconds
-        : minutes + ":" + seconds;
-      timer.textContent = timeSpent;
-    }, 1000);
-  }
-
-// displaying the results once the user gets to the end of the quiz, end timer as well
-  function displayResults() {
-    let notification = document.getElementById("notification");
-    notification.parentElement.removeChild(notification);
-    quizTimer = null;
-    isQuizDone = 1;
-
-    let pageURL = window.location.href;
-    let shareText = `I just finished this quiz and got ${score} out of ${
-      questions.length
-    } questions right.`;
-    let fbShareURL = `https://www.facebook.com/sharer.php?u=${pageURL}&quote=${shareText}`;
-    let twitterShareURL = `https://twitter.com/intent/tweet?text=${shareText} ${pageURL}`;
-
-    quiz.innerHTML = `<section id="results" class="text-center">
-    <h2 class="bold">Here are your results:</h2>
-    <p id="percentage">${scorePercentage()}%</p>
-    <p>You got <span class="bold">${score}</span> out of <span class="bold">${
-      questions.length
-    }</span> questions.</p>
-    <p style="margin-top: 10px;">Time spent: <span class="bold">${timeSpent}</span></p>
-
-    <h3 class="bold">Share your results</h3>
-    <a class="share-link fb-bg" href="${fbShareURL}" target="_blank">Facebook</a>
-    <a class="share-link twitter-bg" href="${twitterShareURL}" target="_blank">Tweet</a>
-
-    <button type="button" id="start-over-btn" class="btn blue-btn">Start over</button>
-    </section>`;
-  }
-
-  function goToNextQuestion() {
-    currentQuestion++;
-    questionIndex++;
-    questionIsAnswered = 0;
-
-    let notification = document.getElementById("notification");
-    notification.parentElement.removeChild(notification);
-
-    let questionNumber = document.getElementById("questionNumber");
-    questionNumber.textContent = `${currentQuestion}/${questions.length}`;
-
-    displayQuestion();
-  }
-
-  function submitAnswer(e) {
-    let selectedAnswer = Number(e.target.value);
-    let rightAnswer = questions[questionIndex].correctAnswer;
-    let answers = document.getElementsByName("answers");
-    let progress = document.getElementById("progress");
-
-    questionIsAnswered = 1;
-
-//how much progress the user has input
-    progress.style.width = progressPercentage() + "%";
-
-    let notification = document.createElement("div");
-    let message = document.createElement("p");
-    let label = e.target.nextElementSibling;
-    notification.id = "notification";
-
-    if (selectedAnswer === rightAnswer) {
-      score++;
-      message.textContent = "Right answer!";
-      label.classList.add("green-bg");
-    } else {
-      message.textContent = "Wrong answer!";
-      label.classList.add("red-bg");
-
-      answers.forEach(answer => {
-        if (Number(answer.value) !== rightAnswer) return;
-
-        answer.nextElementSibling.classList.add("green-bg");
-      });
+        for(i=0; i < allOptions; i++){
+            if(option_list.children[i].textContent == correcAns){ //if there is an option which is matched to an array answer 
+                option_list.children[i].setAttribute("class", "option correct"); //adding green color to matched option
+                option_list.children[i].insertAdjacentHTML("beforeend", tickIconTag); //adding tick icon to matched option
+                console.log("Auto selected correct answer.");
+            }
+        }
     }
-
-    let button = document.createElement("button");
-    button.classList.add("blue-btn");
-
-    if (isLastQuestion()) {
-      button.id = "show-results-btn";
-      button.textContent = "Show results";
-      clearInterval(quizTimer);
-      quizTimer = null;
-    } else {
-      button.id = "next-btn";
-      button.textContent = "Continue";
+    for(i=0; i < allOptions; i++){
+        option_list.children[i].classList.add("disabled"); //once user select an option then disabled all options
     }
+    next_btn.classList.add("show"); //show the next button if user selected any option
+}
 
-    notification.appendChild(message);
-    notification.appendChild(button);
-    quiz.insertAdjacentElement("afterend", notification);
-
-    button.focus();
-
-    answers.forEach(answer => (answer.disabled = "disabled"));
-
-    document.getElementById("score").textContent = score;
-  }
-
-//perecentage of the final score in the end.
-  let scorePercentage = () => (score / questions.length * 100).toFixed(0);
-  let progressPercentage = () =>
-    (currentQuestion / questions.length * 100).toFixed(0);
-  let isLastQuestion = () => currentQuestion === questions.length;
-
-  function spaceBarHandler() {
-    if (document.querySelector(".quiz-intro")) {
-      initQuiz();
+function showResult(){
+    info_box.classList.remove("activeInfo"); //hide info box
+    quiz_box.classList.remove("activeQuiz"); //hide quiz box
+    result_box.classList.add("activeResult"); //show result box
+    const scoreText = result_box.querySelector(".score_text");
+    if (userScore > 3){ // if user scored more than 3
+        //creating a new span tag and passing the user score number and total question number
+        let scoreTag = '<span>and congrats! 🎉, You got <p>'+ userScore +'</p> out of <p>'+ questions.length +'</p></span>';
+        scoreText.innerHTML = scoreTag;  //adding new span tag inside score_Text
     }
-
-    if (questionIsAnswered && quizTimer) {
-      goToNextQuestion();
+    else if(userScore > 1){ // if user scored more than 1
+        let scoreTag = '<span>and nice, You got <p>'+ userScore +'</p> out of <p>'+ questions.length +'</p></span>';
+        scoreText.innerHTML = scoreTag;
     }
-
-    if (!quizTimer && !isQuizDone) {
-      displayResults();
-      console.log("last");
+    else{ // if user scored less than 1
+        let scoreTag = '<span>and sorry, You got only <p>'+ userScore +'</p> out of <p>'+ questions.length +'</p></span>';
+        scoreText.innerHTML = scoreTag;
     }
-  }
+}
 
-  function numericKeyHandler(e) {
-    let answers = document.getElementsByName("answers");
+function startTimer(time){
+    counter = setInterval(timer, 1000);
+    function timer(){
+        timeCount.textContent = time; //changing the value of timeCount with time value
+        time--; //decrement the time value
+        if(time < 9){ //if timer is less than 9
+            let addZero = timeCount.textContent; 
+            timeCount.textContent = "0" + addZero; //add a 0 before time value
+        }
+        if(time < 0){ //if timer is less than 0
+            clearInterval(counter); //clear counter
+            timeText.textContent = "Time Off"; //change the time text to time off
+            const allOptions = option_list.children.length; //getting all option items
+            let correcAns = questions[que_count].answer; //getting correct answer from array
+            for(i=0; i < allOptions; i++){
+                if(option_list.children[i].textContent == correcAns){ //if there is an option which is matched to an array answer
+                    option_list.children[i].setAttribute("class", "option correct"); //adding green color to matched option
+                    option_list.children[i].insertAdjacentHTML("beforeend", tickIconTag); //adding tick icon to matched option
+                    console.log("Time Off: Auto selected correct answer.");
+                }
+            }
+            for(i=0; i < allOptions; i++){
+                option_list.children[i].classList.add("disabled"); //once user select an option then disabled all options
+            }
+            next_btn.classList.add("show"); //show the next button if user selected any option
+        }
+    }
+}
 
-    answers.forEach(answer => {
-      if (answer.value === e.key) {
-        if (questionIsAnswered) return;
+function startTimerLine(time){
+    counterLine = setInterval(timer, 29);
+    function timer(){
+        time += 1; //upgrading time value with 1
+        time_line.style.width = time + "px"; //increasing width of time_line with px by time value
+        if(time > 549){ //if time value is greater than 549
+            clearInterval(counterLine); //clear counterLine
+        }
+    }
+}
 
-        answer.checked = "checked";
+function queCounter(index){
+    //creating a new span tag and passing the question number and total question
+    let totalQueCounTag = '<span><p>'+ index +'</p> of <p>'+ questions.length +'</p> Questions</span>';
+    bottom_ques_counter.innerHTML = totalQueCounTag;  //adding new span tag inside bottom_ques_counter
+}
 
-        let event = new Event("change");
-        answer.dispatchEvent(event);
-        submitAnswer(event);
 
-        questionIsAnswered = 1;
-      }
-    });
-  }
 
-//if statements
-  document.addEventListener("click", function(e) {
-    if (
-      e.target.matches("#start-quiz-btn") ||
-      e.target.matches("#start-over-btn")
-    )
-      initQuiz();
-    if (e.target.matches("#next-btn")) goToNextQuestion();
-    if (e.target.matches("#show-results-btn")) displayResults();
-  });
 
-  document.addEventListener("change", function(e) {
-    if (e.target.matches('input[type="radio"]')) submitAnswer(e);
-  });
+// creating an array and passing the number, que
+let questions = [
+    {
+    numb: 1,
+    question: "What does HTML stand for?",
+    answer: "Hyper Text Markup Language",
+    options: [
+      "Hyper Text Preprocessor",
+      "Hyper Text Markup Language",
+      "Hyper Text Multiple Language",
+      "Hyper Tool Multi Language"
+    ]
+  },
+    {
+    numb: 2,
+    question: "What does CSS stand for?",
+    answer: "Cascading Style Sheet",
+    options: [
+      "Common Style Sheet",
+      "Colorful Style Sheet",
+      "Computer Style Sheet",
+      "Cascading Style Sheet"
+    ]
+  },
+    {
+    numb: 3,
+    question: "What does PHP stand for?",
+    answer: "Hypertext Preprocessor",
+    options: [
+      "Hypertext Preprocessor",
+      "Hypertext Programming",
+      "Hypertext Preprogramming",
+      "Hometext Preprocessor"
+    ]
+  },
+    {
+    numb: 4,
+    question: "What does SQL stand for?",
+    answer: "Structured Query Language",
+    options: [
+      "Stylish Question Language",
+      "Stylesheet Query Language",
+      "Statement Question Language",
+      "Structured Query Language"
+    ]
+  },
+    {
+    numb: 5,
+    question: "What does XML stand for?",
+    answer: "eXtensible Markup Language",
+    options: [
+      "eXtensible Markup Language",
+      "eXecutable Multiple Language",
+      "eXTra Multi-Program Language",
+      "eXamine Multiple Language"
+    ]
+  },
+  // you can uncomment the below codes and make 
+  // but remember you need to give the numb valu
 
-  document.addEventListener("keyup", function(e) {
-    if (e.keyCode === 32) spaceBarHandler(); // init quiz / go to next question
-    if (e.keyCode >= 48 && e.keyCode <= 57) numericKeyHandler(e); // choose an answer
-  });
-
-  document
-    .getElementById("shortcuts-info-btn")
-    .addEventListener("click", function() {
-      let info = document.querySelector(".shortcuts-info");
-      info.classList.toggle("display-block");
-    });
-})();
+  //   {
+  //   numb: 6,
+  //   question: "Your Question is Here",
+  //   answer: "Correct answer of the question i
+  //   options: [
+  //     "Option 1",
+  //     "option 2",
+  //     "option 3",
+  //     "option 4"
+  //   ]
+  // },
+]; 
